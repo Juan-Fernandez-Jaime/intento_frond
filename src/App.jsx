@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './pages/LoginPage.jsx';
-import DashboardPage from './pages/DashboardPage.js';
+import LoginPage from './pages/LoginPage'; //
+import DashboardPage from './pages/DashboardPage'; // Asegúrate que sea .jsx
 
-// Componente para proteger la ruta (solo entra si hay token)
 const RutaPrivada = ({ children }) => {
     const token = localStorage.getItem('token');
     return token ? children : <Navigate to="/" />;
@@ -26,5 +25,4 @@ function App() {
     );
 }
 
-// ⚠️ ¡ESTA LÍNEA ES LA QUE TE FALTA!
 export default App;
