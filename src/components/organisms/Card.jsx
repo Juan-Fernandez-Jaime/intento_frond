@@ -1,45 +1,67 @@
 import React from 'react';
-import Button from '../atoms/Button';
 
 const Cart = ({ items, onRemove, onCheckout, total }) => {
     return (
-        <div className="bg-gray-100 p-6 rounded-lg h-full">
-            <h2 className="text-2xl font-bold mb-4">Nueva Venta</h2>
+        <div className="bg-white p-6 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                <h2 className="text-xl font-bold text-slate-800">🛒 Tu Carrito</h2>
+                <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full">
+                    {items.length} items
+                </span>
+            </div>
 
             {items.length === 0 ? (
-                <p className="text-gray-500">El carrito está vacío</p>
+                <div className="flex flex-col items-center justify-center flex-grow text-slate-400 py-10">
+                    <span className="text-4xl mb-2">🛍️</span>
+                    <p>El carrito está vacío</p>
+                </div>
             ) : (
-                <ul className="space-y-3 mb-6">
+                <div className="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                     {items.map((item, index) => (
-                        <li key={index} className="flex justify-between items-center bg-white p-2 rounded">
+                        <div key={index} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
                             <div>
-                                <span className="font-bold block">{item.nombre}</span>
-                                <span className="text-sm text-gray-500">
-                  {item.cantidad} x ${item.precio}
-                </span>
+                                <h4 className="font-bold text-slate-700 text-sm">{item.nombre}</h4>
+                                <div className="text-xs text-slate-500 mt-1">
+                                    <span className="font-semibold text-indigo-600">{item.cantidad}</span> x ${item.precio.toLocaleString()}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <span className="font-bold">${item.cantidad * item.precio}</span>
+                            <div className="flex items-center gap-3">
+                                <span className="font-bold text-slate-700 text-sm">
+                                    ${(item.cantidad * item.precio).toLocaleString()}
+                                </span>
                                 <button
                                     onClick={() => onRemove(item.id)}
-                                    className="text-red-500 hover:text-red-700 font-bold"
+                                    className="w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all text-xs"
                                 >
-                                    X
+                                    ✕
                                 </button>
                             </div>
-                        </li>
+                        </div>
                     ))}
-                </ul>
+                </div>
             )}
 
-            <div className="border-t pt-4 mt-auto">
-                <div className="flex justify-between text-xl font-bold mb-4">
-                    <span>Total:</span>
-                    <span>${total}</span>
+            <div className="mt-auto pt-6 border-t border-dashed border-slate-200">
+                <div className="flex justify-between items-end mb-6">
+                    <span className="text-slate-500 font-medium">Total a pagar</span>
+                    <span className="text-3xl font-extrabold text-slate-800">
+                        ${total.toLocaleString()}
+                    </span>
                 </div>
-                <Button variant="success" onClick={onCheckout} >
+
+                <button
+                    onClick={onCheckout}
+                    disabled={items.length === 0}
+                    className={`
+                        w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all
+                        ${items.length === 0
+                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                        : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30 hover:-translate-y-1'
+                    }
+                    `}
+                >
                     Confirmar Venta
-                </Button>
+                </button>
             </div>
         </div>
     );

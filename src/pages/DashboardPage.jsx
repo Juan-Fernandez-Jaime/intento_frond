@@ -2,15 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import ProductCard from '../components/molecules/ProductCard';
-import Cart from '../components/organisms/Card';
-import Button from '../components/atoms/Button';
+import Cart from '../components/organisms/Card'; // Asegúrate que el import coincida con el nombre del archivo
+import Navbar from '../components/organisms/Navbar'; // Importamos el nuevo Navbar
 
 const DashboardPage = () => {
     const [productos, setProductos] = useState([]);
     const [carrito, setCarrito] = useState([]);
     const navigate = useNavigate();
 
-    // 1. Cargar productos al entrar
     const cargarProductos = async () => {
         try {
             const { data } = await api.get('/productos');
@@ -23,12 +22,10 @@ const DashboardPage = () => {
 
     useEffect(() => { cargarProductos(); }, []);
 
-    // Lógica del carrito
     const agregar = (prod) => {
         setCarrito(prev => {
             const existe = prev.find(item => item.id === prod.id);
             if (existe) {
-                // CORRECCIÓN AQUÍ: Quitamos el "Tl" que sobraba
                 if (existe.cantidad >= prod.stock) return prev;
                 return prev.map(item => item.id === prod.id ? { ...item, cantidad: item.cantidad + 1 } : item);
             }
@@ -40,11 +37,9 @@ const DashboardPage = () => {
         setCarrito(prev => prev.filter(item => item.id !== id));
     };
 
-    // 2. Enviar venta
     const finalizarVenta = async () => {
         if (carrito.length === 0) return;
 
-        // Formato DTO para NestJS
         const datosVenta = {
             detalles: carrito.map(item => ({
                 productoId: item.id,
@@ -62,34 +57,44 @@ const DashboardPage = () => {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        navigate('/');
-    };
-
     const total = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <header className="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-10">
-                <h1 className="text-xl font-bold">Sistema de Ventas</h1>
-                <Button onClick={logout} variant="danger" className="text-sm">Cerrar Sesión</Button>
-            </header>
+        <div className="min-h-screen bg-gray-100 flex flex-col">
+            {/* 1. Usamos el nuevo Navbar */}
+            <Navbar />
 
-            <div className="container mx-auto p-4 flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Catálogo */}
-                <div className="md:col-span-2">
-                    <h2 className="text-2xl font-bold mb-4 text-gray-700">Productos Disponibles</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {productos.map(prod => (
-                            <ProductCard key={prod.id} producto={prod} onAddToCart={agregar} />
-                        ))}
+            <div className="container mx-auto p-6 flex-grow">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                    {/* 2. Columna Izquierda: Catálogo (Ocupa 8 de 12 columnas) */}
+                    <div className="lg:col-span-8">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800">Catálogo</h2>
+                            <span className="text-sm bg-blue-100 text-blue-800 py-1 px-3 rounded-full">
+                        {productos.length} productos
+                    </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {productos.map(prod => (
+                                <ProductCard key={prod.id} producto={prod} onAddToCart={agregar} />
+                            ))}
+                        </div>
                     </div>
-                </div>
 
-                {/* Carrito */}
-                <div className="md:col-span-1">
-                    <Cart items={carrito} onRemove={quitar} onCheckout={finalizarVenta} total={total} />
+                    {/* 3. Columna Derecha: Carrito (Ocupa 4 de 12 columnas) */}
+                    <div className="lg:col-span-4 sticky top-24">
+                        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                            <Cart
+                                items={carrito}
+                                onRemove={quitar}
+                                onCheckout={finalizarVenta}
+                                total={total}
+                            />
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
