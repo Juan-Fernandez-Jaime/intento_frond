@@ -10,6 +10,7 @@ const Cart = ({ items, onRemove, onCheckout, total }) => {
                 </span>
             </div>
 
+            {/* ... (La sección de items se mantiene igual) ... */}
             {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center flex-grow text-slate-400 py-10">
                     <span className="text-4xl mb-2">🛍️</span>
@@ -29,12 +30,7 @@ const Cart = ({ items, onRemove, onCheckout, total }) => {
                                 <span className="font-bold text-slate-700 text-sm">
                                     ${(item.cantidad * item.precio).toLocaleString()}
                                 </span>
-                                <button
-                                    onClick={() => onRemove(item.id)}
-                                    className="w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all text-xs"
-                                >
-                                    ✕
-                                </button>
+                                <button onClick={() => onRemove(item.id)} className="text-red-500 font-bold px-2">✕</button>
                             </div>
                         </div>
                     ))}
@@ -49,19 +45,36 @@ const Cart = ({ items, onRemove, onCheckout, total }) => {
                     </span>
                 </div>
 
-                <button
-                    onClick={onCheckout}
-                    disabled={items.length === 0}
-                    className={`
-                        w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all
-                        ${items.length === 0
-                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                        : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30 hover:-translate-y-1'
-                    }
-                    `}
-                >
-                    Confirmar Venta
-                </button>
+                {/* 4. AQUÍ CAMBIAMOS EL BOTÓN ÚNICO POR DOS BOTONES */}
+                <div className="grid grid-cols-2 gap-3">
+                    <button
+                        onClick={() => onCheckout('EFECTIVO')}
+                        disabled={items.length === 0}
+                        className={`
+                            py-3 rounded-xl font-bold text-sm shadow-lg transition-all flex flex-col items-center justify-center gap-1
+                            ${items.length === 0
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30 hover:-translate-y-1'
+                        }
+                        `}
+                    >
+                        <span>💵 Efectivo</span>
+                    </button>
+
+                    <button
+                        onClick={() => onCheckout('TARJETA')}
+                        disabled={items.length === 0}
+                        className={`
+                            py-3 rounded-xl font-bold text-sm shadow-lg transition-all flex flex-col items-center justify-center gap-1
+                            ${items.length === 0
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/30 hover:-translate-y-1'
+                        }
+                        `}
+                    >
+                        <span>💳 Tarjeta</span>
+                    </button>
+                </div>
             </div>
         </div>
     );

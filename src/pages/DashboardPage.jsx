@@ -2,14 +2,26 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import ProductCard from '../components/molecules/ProductCard';
-import Cart from '../components/organisms/Card'; // Asegúrate que el import coincida con el nombre del archivo
-import Navbar from '../components/organisms/Navbar'; // Importamos el nuevo Navbar
+import Cart from '../components/organisms/Card';
+import Navbar from '../components/organisms/Navbar';
 
 const DashboardPage = () => {
     const [productos, setProductos] = useState([]);
     const [carrito, setCarrito] = useState([]);
     const navigate = useNavigate();
 
+    // Función auxiliar para saber si es Admin
+    const checkAdmin = () => {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.role === 'admin';
+        } catch { return false; }
+    };
+    const isAdmin = checkAdmin();
+
+    // 1. Cargar productos
     const cargarProductos = async () => {
         try {
             const { data } = await api.get('/productos');
@@ -22,6 +34,21 @@ const DashboardPage = () => {
 
     useEffect(() => { cargarProductos(); }, []);
 
+    // 2. FUNCIÓN DE ELIMINAR (Solo por ID)
+    const handleDeleteProduct = async (id) => {
+        if (!window.confirm('¿Estás seguro de eliminar este producto?')) return;
+
+        try {
+            await api.delete(`/productos/${id}`); // Llamada al backend
+            alert('Producto eliminado correctamente');
+            // Actualizamos la lista visualmente sin recargar
+            setProductos(prev => prev.filter(p => p.id !== id));
+        } catch (error) {
+            alert('Error: ' + (error.response?.data?.message || 'No tienes permisos'));
+        }
+    };
+
+    // 3. Lógica del carrito (Agregar)
     const agregar = (prod) => {
         setCarrito(prev => {
             const existe = prev.find(item => item.id === prod.id);
@@ -33,59 +60,68 @@ const DashboardPage = () => {
         });
     };
 
+    // 4. Quitar del carrito
     const quitar = (id) => {
         setCarrito(prev => prev.filter(item => item.id !== id));
     };
 
-    const finalizarVenta = async () => {
+    // 5. Finalizar Venta
+    const finalizarVenta = async (metodoPago) => {
         if (carrito.length === 0) return;
 
         const datosVenta = {
             detalles: carrito.map(item => ({
                 productoId: item.id,
                 cantidad: item.cantidad
-            }))
+            })),
+            metodoPago: metodoPago
         };
 
         try {
             await api.post('/boletas', datosVenta);
-            alert('¡Venta realizada con éxito!');
+            alert(`✅ ¡Venta con ${metodoPago} registrada correctamente!`);
             setCarrito([]);
             cargarProductos();
         } catch (error) {
-            alert('Error en la venta: ' + (error.response?.data?.message || 'Revisa el stock'));
+            alert('❌ Error en la venta: ' + (error.response?.data?.message || 'Revisa el stock disponible'));
         }
     };
 
     const total = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col">
-            {/* 1. Usamos el nuevo Navbar */}
+        <div className="min-h-screen bg-gray-50 flex flex-col">
             <Navbar />
 
             <div className="container mx-auto p-6 flex-grow">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                    {/* 2. Columna Izquierda: Catálogo (Ocupa 8 de 12 columnas) */}
+                    {/* Catálogo */}
                     <div className="lg:col-span-8">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-gray-800">Catálogo</h2>
-                            <span className="text-sm bg-blue-100 text-blue-800 py-1 px-3 rounded-full">
-                        {productos.length} productos
+                            <h2 className="text-2xl font-bold text-slate-800">Catálogo de Productos</h2>
+                            <span className="bg-indigo-100 text-indigo-700 py-1 px-3 rounded-full text-sm font-semibold">
+                        {productos.length} Disponibles
                     </span>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                             {productos.map(prod => (
-                                <ProductCard key={prod.id} producto={prod} onAddToCart={agregar} />
+                                <ProductCard
+                                    key={prod.id}
+                                    producto={prod}
+                                    onAddToCart={agregar}
+                                    // ⬇️ PASAMOS LAS NUEVAS PROPIEDADES
+                                    onDelete={handleDeleteProduct}
+                                    isAdmin={isAdmin}
+                                />
                             ))}
                         </div>
                     </div>
 
-                    {/* 3. Columna Derecha: Carrito (Ocupa 4 de 12 columnas) */}
+                    {/* Carrito */}
                     <div className="lg:col-span-4 sticky top-24">
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden h-[calc(100vh-8rem)]">
                             <Cart
                                 items={carrito}
                                 onRemove={quitar}
