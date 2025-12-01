@@ -1,16 +1,47 @@
-# React + Vite
+# 💻 Frontend - Sistema de Punto de Venta (POS)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interfaz de usuario moderna y responsiva para el sistema de gestión de ventas "TiendaApp". Desarrollada con *React* y *Vite, implementando una arquitectura de **Diseño Atómico* para componentes reutilizables y escalables.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologías Utilizadas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+* *Framework:* [React 19](https://react.dev/)
+* *Build Tool:* [Vite](https://vitejs.dev/) (Rápido y ligero)
+* *Estilos:* [Tailwind CSS v4](https://tailwindcss.com/) (Diseño moderno y responsivo)
+* *Enrutamiento:* [React Router DOM v7](https://reactrouter.com/)
+* *Cliente HTTP:* [Axios](https://axios-http.com/)
+* *Iconografía & Fuentes:* Google Fonts (Plus Jakarta Sans)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📋 Requisitos Previos
 
-## Expanding the ESLint configuration
+1.   Tener instalado *Node.js* (v18 o superior).
+2.  Tener el *Backend* del sistema corriendo en el puerto 4000.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🛠️ Instalación y Configuración
+
+1.  *Clonar o descargar el repositorio*
+   Desde la Url: https://github.com/Juan-Fernandez-Jaime/intento_frond
+    
+
+
+2.  *Instalar dependencias:*
+    bash
+    npm install
+
+
+3.  *Configurar Conexión al Backend:*
+    El sistema está configurado por defecto para conectarse a localhost:4000.
+    Si necesitas cambiar esto, edita el archivo:
+    src/services/api.js
+
+---
+
+## ▶️ Ejecución del Proyecto
+
+Para iniciar el servidor de desarrollo:
+
+```bash
+npm run dev
