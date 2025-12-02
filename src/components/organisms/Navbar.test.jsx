@@ -3,7 +3,7 @@ import Navbar from './Navbar';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 
-// Mock de navegación y localStorage
+
 const { mockNavigate } = vi.hoisted(() => ({ mockNavigate: vi.fn() }));
 
 vi.mock('react-router-dom', async () => {
@@ -33,5 +33,22 @@ describe('Navbar Component', () => {
 
         expect(localStorage.getItem('token')).toBeNull();
         expect(mockNavigate).toHaveBeenCalledWith('/');
+    });
+
+
+    it('NO debe mostrar enlaces de administración si el usuario es Vendedor', () => {
+        // Simulamos token de VENDEDOR
+        const token = btoa(JSON.stringify({ role: 'vendedor', nombre: 'Vendedor' }));
+        localStorage.setItem('token', `H.${token}.S`);
+
+        render(<BrowserRouter><Navbar /></BrowserRouter>);
+
+
+        expect(screen.queryByText('+ Producto')).not.toBeInTheDocument();
+        expect(screen.queryByText('+ Usuario')).not.toBeInTheDocument();
+
+
+        expect(screen.getByText('Historial')).toBeInTheDocument();
+        expect(screen.getByText('Punto de Venta')).toBeInTheDocument();
     });
 });

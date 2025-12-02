@@ -10,7 +10,9 @@ export default defineConfig({
     ],
     test: {
         environment: 'jsdom',
-        setupFiles: './src/test/setup.js',
-        globals: true, // Para usar 'describe', 'it', 'expect' sin importar
+
+        setupFiles: './src/setupTests.js',
+        globals: true,
+        css: true
     },
 })

@@ -16,7 +16,7 @@ const mockBoletas = [
         total: 50000,
         metodoPago: 'EFECTIVO',
         usuario: { nombre: 'Vendedor 1' },
-        detalles: [{ id: 1, cantidad: 2, producto: { nombre: 'Mouse' } }]
+        detalles: [{ id: 1, cantidad: 2, producto: { nombre: 'Mouse', precio: 25000 } }]
     }
 ];
 
@@ -28,12 +28,15 @@ describe('SalesPage', () => {
 
         render(<BrowserRouter><SalesPage /></BrowserRouter>);
 
-
         await waitFor(() => {
             expect(screen.getByText('Vendedor 1')).toBeInTheDocument();
-            expect(screen.getByText(/\$50[.,]000/)).toBeInTheDocument();
-            expect(screen.getByText('EFECTIVO')).toBeInTheDocument();
         });
+
+
+        const prices = screen.getAllByText(/\$50[.,]000/);
+        expect(prices.length).toBeGreaterThan(0);
+
+        expect(screen.getByText('EFECTIVO')).toBeInTheDocument();
     });
 
     it('debe mostrar mensaje si no hay ventas', async () => {

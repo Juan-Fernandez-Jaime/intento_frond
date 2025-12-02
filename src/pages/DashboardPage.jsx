@@ -4,17 +4,33 @@ import api from '../services/api';
 import ProductCard from '../components/molecules/ProductCard';
 import Cart from '../components/organisms/Card';
 import Navbar from '../components/organisms/Navbar';
-import ReceiptModal from '../components/organisms/ReceiptModal'; // 1. Importar el Modal
+import ReceiptModal from '../components/organisms/ReceiptModal';
 
 const DashboardPage = () => {
     const [productos, setProductos] = useState([]);
     const [carrito, setCarrito] = useState([]);
-
-    // 2. Estados para manejar el Modal de la boleta
     const [showReceipt, setShowReceipt] = useState(false);
     const [lastSale, setLastSale] = useState(null);
-
     const navigate = useNavigate();
+
+    // 1. Lógica SEGURA para detectar Admin
+    const checkAdmin = () => {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+        try {
+            // Dividimos el token y decodificamos la parte del payload (índice 1)
+            const parts = token.split('.');
+            if (parts.length < 2) return false;
+
+            const payload = JSON.parse(atob(parts[1]));
+            return payload.role === 'admin';
+        } catch (e) {
+            console.error('Error decodificando token:', e);
+            return false;
+        }
+    };
+
+    const isAdmin = checkAdmin();
 
     const cargarProductos = async () => {
         try {
@@ -42,7 +58,6 @@ const DashboardPage = () => {
         setCarrito(prev => prev.filter(item => item.id !== id));
     };
 
-    // 3. Modificar la función de finalizar venta
     const finalizarVenta = async (metodoPago) => {
         if (carrito.length === 0) return;
 
@@ -55,35 +70,35 @@ const DashboardPage = () => {
         };
 
         try {
-            // Enviamos al backend
             const response = await api.post('/boletas', datosVenta);
-
-            // Preparamos los datos para la boleta visual
-            // Combinamos la respuesta del backend (ID, fecha) con el carrito local (nombres, precios)
             const datosBoleta = {
-                ...response.data,     // ID, fecha, total del backend
-                metodoPago,           // Método de pago seleccionado
-                items: [...carrito]   // Copia de los productos para mostrarlos
+                ...response.data,
+                metodoPago,
+                items: [...carrito]
             };
-
-            // Guardamos la venta y mostramos el modal
             setLastSale(datosBoleta);
             setShowReceipt(true);
-
-            // Limpiamos el carrito y recargamos stock
             setCarrito([]);
             cargarProductos();
-
         } catch (error) {
             alert('❌ Error: ' + (error.response?.data?.message || 'Revisa el stock'));
+        }
+    };
+
+    const handleDeleteProduct = async (id) => {
+        if (!window.confirm('¿Estás seguro de eliminar este producto?')) return;
+        try {
+            await api.delete(`/productos/${id}`);
+            alert('Producto eliminado');
+            cargarProductos();
+        } catch (error) {
+            alert('Error al eliminar');
         }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             <Navbar />
-
-            {/* 4. Renderizar el Modal si está activo */}
             <ReceiptModal
                 isOpen={showReceipt}
                 onClose={() => setShowReceipt(false)}
@@ -92,18 +107,23 @@ const DashboardPage = () => {
 
             <div className="container mx-auto p-6 flex-grow">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
                     <div className="lg:col-span-8">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-slate-800">Catálogo de Productos</h2>
                             <span className="bg-indigo-100 text-indigo-700 py-1 px-3 rounded-full text-sm font-semibold">
-                        {productos.length} Disponibles
-                    </span>
+                                {productos.length} Disponibles
+                            </span>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                             {productos.map(prod => (
-                                <ProductCard key={prod.id} producto={prod} onAddToCart={agregar} />
+                                <ProductCard
+                                    key={prod.id}
+                                    producto={prod}
+                                    onAddToCart={agregar}
+                                    isAdmin={isAdmin} // Pasamos la prop calculada
+                                    onDelete={handleDeleteProduct}
+                                />
                             ))}
                         </div>
                     </div>
@@ -118,7 +138,6 @@ const DashboardPage = () => {
                             />
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
