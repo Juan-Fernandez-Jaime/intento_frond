@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:4000/api', // Según tu api.ts
+    // Usamos la variable de entorno, o un fallback por si acaso
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
 });
 
 // Interceptor para agregar el Token automáticamente
